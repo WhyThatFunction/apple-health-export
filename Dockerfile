@@ -7,7 +7,7 @@ RUN apk add --no-cache musl-dev build-base pkgconfig
 
 WORKDIR /app
 
-ENV RUSTFLAGS="-C target-feature=+crt-static"
+#ENV RUSTFLAGS="-C target-feature=+crt-static"
 # Build using bind-mounted source (ro) and cached target dir
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=cache,target=/usr/local/cargo/git,sharing=locked \
@@ -15,11 +15,10 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
     --mount=type=bind,source=.,target=/src,ro \
     CARGO_TARGET_DIR=/app/target cargo build --profile prod --locked \
       --bin ahe --bin ahe-healthcheck \
-      --target $(cat /rust_target) \
       --manifest-path /src/Cargo.toml \
  && mkdir -p /out \
- && cp target/$(cat /rust_target)/prod/ahe /out/apple-health-export \
- && cp target/$(cat /rust_target)/prod/ahe-healthcheck /out/ahe-healthcheck
+ && cp target/prod/ahe /out/apple-health-export \
+ && cp target/prod/ahe-healthcheck /out/ahe-healthcheck
 # Minimal CA bundle for TLS where needed
 FROM alpine:3.20 AS certs
 RUN apk add --no-cache ca-certificates
