@@ -1,0 +1,14 @@
+target/
+**/*.swp
+**/*.swo
+**/.DS_Store
+*.log
+tmp/
+.env
+.env.*
+coverage/
+dist/
+.vscode/
+.idea/
+/.cargo/
+.idea

@@ -1,0 +1,49 @@
+[package]
+name = "apple-health-export"
+version = "1.0.0"
+edition = "2024"
+license = "MIT"
+publish = false
+authors = [
+    "Stephane Segning <selastlambou@gmail.com>"
+]
+
+
+[dependencies]
+axum = { version = "0.8", features = ["json"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "tracing", "net", "process", "fs"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive", "env"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+aws-config = { version = "1", features = ["behavior-version-latest"] }
+aws-sdk-s3 = { version = "1", features = ["behavior-version-latest"] }
+chrono = { version = "0.4", features = ["serde", "clock"] }
+thiserror = "2"
+base64 = "0.22"
+aws-smithy-types = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+opentelemetry = { version = "0.30", features = ["metrics"] }
+opentelemetry_sdk = { version = "0.30", features = ["rt-tokio", "metrics"] }
+opentelemetry-otlp = { version = "0.30", features = ["grpc-tonic", "metrics", "trace"] }
+tracing-opentelemetry = "0.31"
+tower-http = { version = "0.6", features = ["trace"] }
+once_cell = "1"
+mimalloc = "0"
+
+[[bin]]
+name = "ahe"
+path = "src/main.rs"
+
+[[bin]]
+name = "ahe-healthcheck"
+path = "src/bin/ahe-healthcheck.rs"
+
+[profile.prod]
+inherits = "release"
+lto = true
+opt-level = "z"
+codegen-units = 1
+incremental = false
+strip = true

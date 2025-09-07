@@ -1,0 +1,113 @@
+name: apple-health-export
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - RUST_VERSION=1
+        - DEBIAN_RELEASE=bookworm
+    image: ahe:dev
+    environment:
+      - AHE_BUCKET=ahe-test
+      - AHE_PREFIX=
+      - AHE_PORT=8080
+      - AHE_S3_PATH_STYLE=true
+      # Basic auth for testing
+      - AHE_BASIC_USER=test
+      - AHE_BASIC_PASS=test
+      # MinIO S3-compatible endpoint
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://minio:9000
+      - AWS_ALLOW_HTTP=true
+      # Traces -> Jaeger, Metrics -> Otel Collector
+      - OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=grpc
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=grpc
+      - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otelcol:4317
+      - RUST_LOG=info,aws_config=warn,aws_smithy_runtime=warn,hyper=warn,tower_http=info
+    depends_on:
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      jaeger:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/ahe-healthcheck", "--url", "http://127.0.0.1:${AHE_PORT:-8080}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: "/bin/sh"
+    command:
+      - -c
+      - |
+        set -ex;
+        mc alias set local http://minio:9000 minioadmin minioadmin;
+        mc mb -p local/ahe-test || true;
+        mc anonymous set none local/ahe-test || true;
+        mc ls local;
+
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:16686 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otelcol.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "14317:4317"   # gRPC receiver (optional expose)
+      - "14318:4318"   # HTTP receiver (optional expose)
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:13133 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  minio-data:
