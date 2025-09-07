@@ -59,6 +59,9 @@ jobs:
           persist-credentials: 'false'
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@ac90e63697ac2784f4ecfe2964e1a285c304003a # actions-rust-lang/setup-rust-toolchain@v1
+        # Disable caching on pull_request to avoid cache poisoning
+        with:
+          cache: ${{ github.event_name != 'pull_request' }}
       - name: Run cargo-deny
         uses: EmbarkStudios/cargo-deny-action@b0aeff9875d659325e3485c0093059582a2cd40b # EmbarkStudios/cargo-deny-action@v2
         with:
@@ -78,6 +81,8 @@ jobs:
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@ac90e63697ac2784f4ecfe2964e1a285c304003a # actions-rust-lang/setup-rust-toolchain@v1
         with:
+          # Disable caching on pull_request to avoid cache poisoning
+          cache: ${{ github.event_name != 'pull_request' }}
           components: clippy, rustfmt
       - name: Run cargo check
         run: cargo check --all-targets --all-features
