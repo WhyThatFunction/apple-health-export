@@ -98,18 +98,6 @@ jobs:
       - lint
     name: Docker build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        flavour:
-          - OAuth2
-          - Webhook
-        include:
-          - flavour: OAuth2
-            suffix: ""
-            docker_target: "oauth2"
-          - flavour: Webhook
-            suffix: "-webhook"
-            docker_target: "webhook"
     permissions:
       packages: write
       contents: read

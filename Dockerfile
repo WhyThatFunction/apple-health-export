@@ -7,14 +7,6 @@ RUN apk add --no-cache musl-dev build-base pkgconfig
 
 WORKDIR /app
 
-# Build with BuildKit cache mounts for speed
-ARG TARGETPLATFORM
-RUN case "$TARGETPLATFORM" in \
-      "linux/amd64")  rustup target add x86_64-unknown-linux-musl && echo x86_64-unknown-linux-musl > /rust_target ;; \
-      "linux/arm64")  rustup target add aarch64-unknown-linux-musl && echo aarch64-unknown-linux-musl > /rust_target ;; \
-      *) echo "unsupported target $TARGETPLATFORM"; exit 1 ;; \
-    esac
-
 ENV RUSTFLAGS="-C target-feature=+crt-static"
 # Build using bind-mounted source (ro) and cached target dir
 RUN --mount=type=cache,target=/usr/local/cargo/registry,sharing=locked \
