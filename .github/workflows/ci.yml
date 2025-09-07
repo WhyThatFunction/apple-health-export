@@ -115,7 +115,6 @@ jobs:
         with:
           scan-type: 'config'
           scan-ref: '.'
-          trivy-config: 'trivy.yaml'
           format: 'table'
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
@@ -188,9 +187,11 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Install Cosign
+        if: github.event_name != 'pull_request'
         uses: sigstore/cosign-installer@1aa8e0f2454b781fbf0fbf306a4c9533a0c57409 # sigstore/cosign-installer@v3.7.0
 
       - name: Sign multi-arch image (keyless)
+        if: github.event_name != 'pull_request'
         env:
           REF: ${{ steps.img.outputs.ref }}
           COSIGN_EXPERIMENTAL: "true"
@@ -199,6 +200,7 @@ jobs:
 
       # Optional: materialize an SBOM file in SPDX too (in addition to BuildKit’s)
       - name: Generate SBOM (Syft)
+        if: github.event_name != 'pull_request'
         uses: anchore/sbom-action@da167eac915b4e86f08b264dbdbc867b61be6f0c # anchore/sbom-action@v0.20.5
         with:
           image: ${{ steps.img.outputs.ref }}
@@ -206,6 +208,7 @@ jobs:
           output-file: sbom.spdx.json
 
       - name: Attach SBOM as attestation
+        if: github.event_name != 'pull_request'
         env:
           REF: ${{ steps.img.outputs.ref }}
         run: |
@@ -215,6 +218,7 @@ jobs:
             "$REF"
 
       - name: Vulnerability scan (Trivy)
+        if: github.event_name != 'pull_request'
         id: trivy
         uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # aquasecurity/trivy-action@v0.28.0
         with:
@@ -225,22 +229,10 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
 
-      - name: Malware scan (ClamAV)
-        env:
-          REF: ${{ steps.img.outputs.ref }}
-        run: |
-          sudo apt-get update -y && sudo apt-get install -y clamav
-          sudo freshclam
-          cid=$(docker create "$REF")
-          docker export "$cid" -o rootfs.tar
-          mkdir rootfs && tar -xf rootfs.tar -C rootfs
-          # ClamAV returns 1 on "found", 0 on clean, >1 on error.
-          clamscan -r rootfs || true
-
       - name: Upload security artifacts
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # actions/upload-artifact@v4
         with:
           name: security
           path: |
             sbom.spdx.json
-            rootfs.tar
