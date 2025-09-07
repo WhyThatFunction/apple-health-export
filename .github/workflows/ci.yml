@@ -96,7 +96,7 @@ jobs:
       - code-checks
       - sast
       - lint
-    name: Docker build for ${{ matrix.flavour }}
+    name: Docker build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -163,7 +163,7 @@ jobs:
             type=schedule,pattern={{date 'YYYYMMDD-hhmmss' tz='Europe/Berlin'}}
             type=sha,format=long
             type=sha,format=long,prefix={{branch}}
-          images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}${{ matrix.suffix }}
+          images: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}
 
       # Note: omit Actions cache for Docker layers to avoid
       #       cache-poisoning concerns flagged by Zizmor.
@@ -177,7 +177,6 @@ jobs:
           context: .
           file: "Dockerfile"
           push: "true"
-          target: ${{ matrix.docker_target }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
@@ -190,9 +189,9 @@ jobs:
       - name: Set canonical image ref
         id: img
         env:
-          IMAGE: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}${{ matrix.suffix }}
+          IMAGE: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}
           DIGEST: ${{ steps.build.outputs.digest }}
-          REF: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}${{ matrix.suffix }}@${{ steps.build.outputs.digest }}
+          REF: ${{ env.REGISTRY }}/${{ steps.lowercase.outputs.lowercase }}@${{ steps.build.outputs.digest }}
         run: |
           {
             printf 'image=%s\n' "$IMAGE"
@@ -216,14 +215,14 @@ jobs:
         with:
           image: ${{ steps.img.outputs.ref }}
           format: spdx-json
-          output-file: sbom-${{ matrix.flavour }}.spdx.json
+          output-file: sbom.spdx.json
 
       - name: Attach SBOM as attestation
         env:
           REF: ${{ steps.img.outputs.ref }}
         run: |
           cosign attest --yes \
-            --predicate sbom-${{ matrix.flavour }}.spdx.json \
+            --predicate sbom.spdx.json \
             --type spdx \
             "$REF"
 
@@ -253,7 +252,7 @@ jobs:
       - name: Upload security artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # actions/upload-artifact@v4
         with:
-          name: security-${{ matrix.flavour }}
+          name: security
           path: |
-            sbom-${{ matrix.flavour }}.spdx.json
+            sbom.spdx.json
             rootfs.tar
