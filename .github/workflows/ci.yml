@@ -30,7 +30,7 @@ jobs:
           persist-credentials: 'false'
 
       - name: Run ESLint and post results
-        uses: super-linter/super-linter@4d3717f7d854c0e8ed36939351503a15c5148ffc # super-linter/super-linter@v8
+        uses: super-linter/super-linter@ffde3b2b33b745cb612d787f669ef9442b1339a6 # super-linter/super-linter@v8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_GITHUB_ACTIONS: "true"
