@@ -93,7 +93,7 @@ Example:
 ```
 curl -i -X POST http://localhost:8080/ingest \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Basic dGVzdDp0ZXN0' \
+  -H 'Authorization: Basic <a-basic-auth>' \
   -d '{
         "device_name": "apple-watch",
         "data": [ {"foo": 1}, {"bar": 2} ]
