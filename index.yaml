@@ -4,6 +4,34 @@ entries:
   - annotations:
       category: Application
     apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-09T16:21:40.876067226Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 4.0.1
+    description: A Helm chart for Kubernetes
+    digest: d1b877807cee0352bfa0b459e9bf3d4adf66674e832808837f3cf775894f3783
+    home: https://github.com/WhyThatFunction/apple-health-export
+    keywords:
+    - apple
+    - apple-health
+    - apple-health-export
+    maintainers:
+    - email: selastlambou@gmail.com
+      name: Stephane Segning
+    - email: team@vaam.com
+      name: VAAM Team
+    name: apple-health-export
+    sources:
+    - https://github.com/WhyThatFunction/apple-health-export
+    type: application
+    urls:
+    - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-1.0.0/apple-health-export-1.0.0.tgz
+    version: 1.0.0
+  - annotations:
+      category: Application
+    apiVersion: v2
     appVersion: 0.1.2
     created: "2025-09-09T09:58:05.278422042Z"
     dependencies:
@@ -31,6 +59,37 @@ entries:
     - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-0.1.8/apple-health-export-0.1.8.tgz
     version: 0.1.8
   apple-health-export-serverless:
+  - annotations:
+      category: Application
+    apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-09-09T16:21:41.045012142Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: '*'
+    description: A Helm chart for apple-health-export application
+    digest: 59291674724fb07915c5928adc680de995e409f6897628c1194acb3c2b8bce44
+    home: https://github.com/WhyThatFunction/apple-health-export
+    keywords:
+    - apple
+    - apple-health
+    - apple-health-export
+    - serverless
+    maintainers:
+    - email: selastlambou@gmail.com
+      name: Stephane Segning
+    - email: team@vaam.com
+      name: VAAM Team
+    name: apple-health-export-serverless
+    sources:
+    - https://github.com/WhyThatFunction/apple-health-export
+    type: application
+    urls:
+    - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-serverless-1.0.0/apple-health-export-serverless-1.0.0.tgz
+    version: 1.0.0
   - annotations:
       category: Application
     apiVersion: v2
@@ -62,4 +121,4 @@ entries:
     urls:
     - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-serverless-0.1.3/apple-health-export-serverless-0.1.3.tgz
     version: 0.1.3
-generated: "2025-09-09T09:58:05.44857155Z"
+generated: "2025-09-09T16:21:41.045027121Z"
