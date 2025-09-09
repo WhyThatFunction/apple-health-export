@@ -47,13 +47,17 @@ spec:
           {{ end }}
 
           readinessProbe:
-            httpGet:
-              port: {{ .Values.ports.http1.port }}
-              path: "/health"
+            exec:
+              command:
+                - /usr/local/bin/ahe-healthcheck
+            initialDelaySeconds: 1
+            periodSeconds: 5
           livenessProbe:
-            httpGet:
-              port: {{ .Values.ports.http1.port }}
-              path: "/health"
+            exec:
+              command:
+                - /usr/local/bin/ahe-healthcheck
+            initialDelaySeconds: 1
+            periodSeconds: 5
           startupProbe:
             tcpSocket:
               port: {{ .Values.ports.http1.port }}
