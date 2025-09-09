@@ -20,13 +20,30 @@ pub enum Error {
     ByteStream(#[from] aws_smithy_types::byte_stream::error::Error),
 
     #[error("s3 get error: {0}")]
-    S3Get(#[from] aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::get_object::GetObjectError>),
+    S3Get(
+        #[from] Box<aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::get_object::GetObjectError>>,
+    ),
 
     #[error("s3 put error: {0}")]
-    S3Put(#[from] aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::put_object::PutObjectError>),
+    S3Put(
+        #[from] Box<aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::put_object::PutObjectError>>,
+    ),
 
     #[error("s3 head bucket error: {0}")]
     S3Head(
-        #[from] aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::head_bucket::HeadBucketError>,
+        #[from]
+        Box<aws_sdk_s3::error::SdkError<aws_sdk_s3::operation::head_bucket::HeadBucketError>>,
     ),
+
+    #[error("ExporterBuildError error: {source}")]
+    ExporterBuild {
+        #[from]
+        source: opentelemetry_otlp::ExporterBuildError,
+    },
+
+    #[error("SetGlobalDefaultError error: {source}")]
+    SetGlobalDefault {
+        #[from]
+        source: tracing::dispatcher::SetGlobalDefaultError,
+    },
 }

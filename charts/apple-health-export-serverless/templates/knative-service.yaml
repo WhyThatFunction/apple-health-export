@@ -24,6 +24,7 @@ spec:
       {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image ) "context" $) | nindent 6 }}
       containers:
         - image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
+          name: apple-health-export
           {{ with .Values.env }}
           env:
           {{ range $k, $v := . }}

@@ -23,7 +23,7 @@ podAnnotations: ~
 image:
   registry: ghcr.io
   repository: whythatfunction/apple-health-export
-  tag: "main3b4852ef4c0b4e157d4ddc4e6f07aa7da7d21096"
+  tag: "latest"
   digest: ""
   ## Specify a imagePullPolicy
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -45,7 +45,7 @@ env:
   AHE_BUCKET: ahe-test
   AHE_PREFIX: ~
   AHE_PORT: 8080
-  AHE_S3_PATH_STYLE: true
+  AHE_S3_PATH_STYLE: "true"
 
   AHE_BASIC_USER:
     secretKeyRef:
@@ -59,7 +59,7 @@ env:
 
   AWS_ENDPOINT_URL: http://minio:9000
   AWS_ALLOW_HTTP: ~
-  AWS_REGION: ~
+  AWS_REGION: eu-central-1
   AWS_ACCESS_KEY_ID:
     secretKeyRef:
       name: minio
@@ -70,10 +70,14 @@ env:
       name: minio
       key: secret-key
 
-  OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: grpc
-  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4317
-  OTEL_EXPORTER_OTLP_METRICS_PROTOCOL: grpc
-  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://jaeger:4317
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+
+  OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: ~ # grpc
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ~ # http://jaeger:4317
+  OTEL_EXPORTER_OTLP_METRICS_PROTOCOL: ~ # grpc
+  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ~ # http://jaeger:4317
+
   RUST_LOG: "info,aws_config=warn,aws_smithy_runtime=warn,hyper=warn,tower_http=info"
 
 ports:

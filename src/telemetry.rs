@@ -1,76 +1,85 @@
-use opentelemetry::{global, trace::TracerProvider as _};
-use opentelemetry_otlp::{Protocol, WithExportConfig};
-use opentelemetry_sdk::{Resource, metrics::SdkMeterProvider, trace::Sampler};
-use tracing::debug;
-use tracing_subscriber::{EnvFilter, Registry, prelude::*};
+use crate::error::Result;
+use opentelemetry::global;
+use opentelemetry::trace::TracerProvider;
+use opentelemetry_otlp::{Compression, Protocol, SpanExporter, WithExportConfig, WithTonicConfig};
+use std::time::Duration;
+use tracing_opentelemetry::{MetricsLayer, OpenTelemetryLayer};
+use tracing_subscriber::EnvFilter;
+use tracing_subscriber::layer::SubscriberExt;
 
-// Initialize tracing + OTLP export for traces & metrics.
-pub async fn init(service_name: &str) {
-    // Build a resource with service.name. Builder includes default detectors; if you
-    // want to avoid env-detected values, use `builder_empty()` instead.
-    let resource = Resource::builder()
+#[inline]
+pub fn init_tracer_provider(
+    service_name: &str,
+) -> Result<opentelemetry_sdk::trace::SdkTracerProvider> {
+    let exporter = SpanExporter::builder()
+        .with_tonic()
+        .with_compression(Compression::Gzip)
+        .with_timeout(Duration::from_secs(3))
+        .build()?;
+
+    let resource = opentelemetry_sdk::Resource::builder()
         .with_service_name(service_name.to_string())
         .build();
 
-    // Tracing exporter over gRPC (tonic). If building fails, continue without OTLP.
-    let tracer_provider_opt = match opentelemetry_otlp::SpanExporter::builder()
-        .with_tonic()
-        .build()
-    {
-        Ok(exporter) => {
-            let provider = opentelemetry_sdk::trace::SdkTracerProvider::builder()
-                .with_batch_exporter(exporter)
-                .with_resource(resource.clone())
-                .with_sampler(Sampler::ParentBased(Box::new(Sampler::TraceIdRatioBased(
-                    1.0,
-                ))))
-                .build();
-            global::set_tracer_provider(provider.clone());
-            Some(provider)
-        }
-        Err(_e) => None,
-    };
+    let tracer_provider = opentelemetry_sdk::trace::TracerProviderBuilder::default()
+        .with_batch_exporter(exporter)
+        .with_sampler(opentelemetry_sdk::trace::Sampler::AlwaysOn)
+        .with_id_generator(opentelemetry_sdk::trace::RandomIdGenerator::default())
+        .with_max_events_per_span(16)
+        .with_max_attributes_per_span(16)
+        .with_resource(resource)
+        .build();
 
-    // Metrics exporter over gRPC (tonic). Periodic export. Non-fatal on failure.
-    if let Ok(metric_exporter) = opentelemetry_otlp::MetricExporter::builder()
-        .with_tonic()
-        .with_protocol(Protocol::Grpc)
-        .build()
-    {
-        let meter_provider = SdkMeterProvider::builder()
-            .with_periodic_exporter(metric_exporter)
-            .with_resource(resource)
-            .build();
-        global::set_meter_provider(meter_provider);
-    }
+    global::set_tracer_provider(tracer_provider.clone());
 
-    install_subscriber(service_name, tracer_provider_opt);
+    Ok(tracer_provider)
 }
 
-fn install_subscriber(
+pub fn init_meter_provider(
     service_name: &str,
-    tracer_provider: Option<opentelemetry_sdk::trace::SdkTracerProvider>,
-) {
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
-        EnvFilter::new("info,aws_config=warn,aws_smithy_runtime=warn,hyper=warn,tower_http=info")
-    });
+) -> Result<opentelemetry_sdk::metrics::SdkMeterProvider> {
+    let exporter = opentelemetry_otlp::MetricExporter::builder()
+        .with_temporality(opentelemetry_sdk::metrics::Temporality::default())
+        .with_tonic()
+        .with_compression(Compression::Gzip)
+        .with_protocol(Protocol::Grpc)
+        .with_timeout(Duration::from_secs(3))
+        .build()?;
 
-    let fmt_layer = tracing_subscriber::fmt::layer().with_target(false);
+    let reader = opentelemetry_sdk::metrics::PeriodicReader::builder(exporter)
+        .with_interval(Duration::from_secs(3))
+        .build();
 
-    // base subscriber
-    let base = Registry::default().with(env_filter).with(fmt_layer);
+    let resource = opentelemetry_sdk::Resource::builder()
+        .with_service_name(service_name.to_string())
+        .build();
 
-    // Optionally add the OTEL layer
-    if let Some(provider) = tracer_provider {
-        let tracer = provider.tracer(service_name.to_string());
-        tracing::subscriber::set_global_default(
-            base.with(tracing_opentelemetry::layer().with_tracer(tracer)),
-        )
-        .expect("failed to install tracing subscriber");
-        debug!("tracing subscriber with OTEL layer installed");
-    } else {
-        tracing::subscriber::set_global_default(base)
-            .expect("failed to install tracing subscriber");
-        debug!("tracing subscriber installed (no OTEL layer)");
-    }
+    let meter_provider = opentelemetry_sdk::metrics::SdkMeterProvider::builder()
+        .with_reader(reader)
+        .with_resource(resource)
+        .build();
+
+    global::set_meter_provider(meter_provider.clone());
+
+    Ok(meter_provider)
+}
+
+/// Set up global subscriber. For now we set a simple env-filter subscriber so
+/// logs/traces are routed through tracing without an OpenTelemetry exporter.
+/// Replace with an OTLP + tracing integration during a proper port.
+pub fn setup_telemetry(service_name: &str) -> Result<()> {
+    let tracer_provider = init_tracer_provider(service_name)?;
+    let meter_provider = init_meter_provider(service_name)?;
+
+    let tracer = tracer_provider.tracer("trace_subscriber");
+
+    let subscriber = tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env())
+        .with(tracing_subscriber::fmt::layer())
+        .with(MetricsLayer::new(meter_provider.clone()))
+        .with(OpenTelemetryLayer::new(tracer));
+
+    tracing::subscriber::set_global_default(subscriber)?;
+
+    Ok(())
 }

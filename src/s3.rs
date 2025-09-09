@@ -5,7 +5,7 @@ use serde_json::Value as JsonValue;
 use std::sync::Arc;
 use tracing::{debug, error, info, instrument};
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::metrics;
 use crate::state::AppState;
 
@@ -51,7 +51,8 @@ pub async fn save_or_merge_json(state: &AppState, key: &str, new_json: JsonValue
                 debug!(%key, "no existing object (will create new)");
                 None
             } else {
-                return Err(err.into());
+                let b = Box::new(err);
+                return Err(Error::from(b));
             }
         }
     };
@@ -75,7 +76,8 @@ pub async fn save_or_merge_json(state: &AppState, key: &str, new_json: JsonValue
         .content_type("application/json")
         .body(ByteStream::from(body))
         .send()
-        .await?;
+        .await
+        .map_err(Box::new)?;
     debug!(%key, "put_object completed");
 
     Ok(())

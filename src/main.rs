@@ -28,7 +28,7 @@ static GLOBAL: MiMalloc = MiMalloc;
 #[allow(clippy::result_large_err)]
 #[tokio::main]
 async fn main() -> Result<()> {
-    telemetry::init("apple-health-export").await;
+    telemetry::setup_telemetry("apple-health-export")?;
 
     let cfg = Config::parse();
     debug!(

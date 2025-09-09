@@ -2,8 +2,8 @@ apiVersion: v2
 name: apple-health-export-serverless
 description: A Helm chart for apple-health-export application
 type: application
-version: 0.1.3
-appVersion: "0.1.2"
+version: 1.0.0
+appVersion: "1.0.0"
 
 keywords:
   - apple
