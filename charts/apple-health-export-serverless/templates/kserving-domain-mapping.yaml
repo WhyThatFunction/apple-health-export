@@ -11,7 +11,7 @@ spec:
     kind: Service
     apiVersion: serving.knative.dev/v1
   tls:
-    secretName: {{ .Values.domain.name }}-tls
+    secretName: "{{ .Values.domain.name }}-tls"
 ---
 {{ if and .Values.domain.tls .Values.domain.tls.issuerRef }}
 ---

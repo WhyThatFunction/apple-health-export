@@ -7,8 +7,10 @@ on:
     tags:
       - 'v*'
     paths:
-      - 'charts/**'
       - '.github/workflows/deploy-docs.yml'
+      - 'charts/**'
+      - 'docs/**'
+      - 'mkdocs.yml'
 
 jobs:
   deploy-website:
