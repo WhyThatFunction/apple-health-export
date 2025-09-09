@@ -1,0 +1,33 @@
+apiVersion: v2
+name: apple-health-export-serverless
+description: A Helm chart for apple-health-export application
+type: application
+version: 0.1.3
+appVersion: "0.1.2"
+
+keywords:
+  - apple
+  - apple-health
+  - apple-health-export
+  - serverless
+
+home: https://github.com/WhyThatFunction/apple-health-export
+
+sources:
+  - https://github.com/WhyThatFunction/apple-health-export
+
+maintainers:
+  - name: Stephane Segning
+    email: selastlambou@gmail.com
+  - name: VAAM Team
+    email: team@vaam.com
+
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: "*"
+
+annotations:
+  category: Application

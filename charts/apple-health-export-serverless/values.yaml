@@ -1,0 +1,98 @@
+global:
+  imageRegistry: ""
+  ## e.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: [ ]
+  defaultStorageClass: ""
+  ## Security parameters
+  ##
+  security:
+    ## @param global.security.allowInsecureImages Allows skipping image verification
+    allowInsecureImages: false
+
+annotations: ~
+
+labels: ~
+
+podLabels: ~
+
+podAnnotations: ~
+
+image:
+  registry: ghcr.io
+  repository: whythatfunction/apple-health-export
+  tag: "main3b4852ef4c0b4e157d4ddc4e6f07aa7da7d21096"
+  digest: ""
+  ## Specify a imagePullPolicy
+  ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: [ ]
+  ## Set to true if you would like to see extra information on logs
+  ##
+  debug: false
+
+env:
+  AHE_BUCKET: ahe-test
+  AHE_PREFIX: ~
+  AHE_PORT: 8080
+  AHE_S3_PATH_STYLE: true
+
+  AHE_BASIC_USER:
+    secretKeyRef:
+      name: ahe-basic
+      key: username
+
+  AHE_BASIC_PASS:
+    secretKeyRef:
+      name: ahe-basic
+      key: password
+
+  AWS_ENDPOINT_URL: http://minio:9000
+  AWS_ALLOW_HTTP: ~
+  AWS_REGION: ~
+  AWS_ACCESS_KEY_ID:
+    secretKeyRef:
+      name: minio
+      key: access-key
+
+  AWS_SECRET_ACCESS_KEY:
+    secretKeyRef:
+      name: minio
+      key: secret-key
+
+  OTEL_EXPORTER_OTLP_TRACES_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4317
+  OTEL_EXPORTER_OTLP_METRICS_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://jaeger:4317
+  RUST_LOG: "info,aws_config=warn,aws_smithy_runtime=warn,hyper=warn,tower_http=info"
+
+ports:
+  http1: # kservice requirements
+    port: 8080
+
+resources:
+  limits:
+    cpu: 1500m
+    memory: 3Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+domain:
+  enabled: false
+  name: miaou.waff.waff
+  tls: ~
+#    issuerRef:
+#      kind: ClusterIssuer
+#      name: self-signed-ca
+#      group: cert-manager.io

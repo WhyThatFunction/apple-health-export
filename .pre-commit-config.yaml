@@ -5,6 +5,7 @@ repos:
     rev: v4.6.0
     hooks:
       - id: check-yaml
+        exclude: 'charts'
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: local
