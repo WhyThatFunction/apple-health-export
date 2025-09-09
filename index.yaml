@@ -1,0 +1,65 @@
+apiVersion: v1
+entries:
+  apple-health-export:
+  - annotations:
+      category: Application
+    apiVersion: v2
+    appVersion: 0.1.2
+    created: "2025-09-09T09:58:05.278422042Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s-labs.github.io/helm-charts
+      version: 4.0.1
+    description: A Helm chart for Kubernetes
+    digest: ac5c5b9a80ad2e6c10bfff994bea3018e732060561eb0249c6ca4e5001d09f2c
+    home: https://github.com/WhyThatFunction/apple-health-export
+    keywords:
+    - apple
+    - apple-health
+    - apple-health-export
+    - serverless
+    maintainers:
+    - email: selastlambou@gmail.com
+      name: Stephane Segning
+    - email: team@vaam.com
+      name: VAAM Team
+    name: apple-health-export
+    sources:
+    - https://github.com/WhyThatFunction/apple-health-export
+    type: application
+    urls:
+    - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-0.1.8/apple-health-export-0.1.8.tgz
+    version: 0.1.8
+  apple-health-export-serverless:
+  - annotations:
+      category: Application
+    apiVersion: v2
+    appVersion: 0.1.2
+    created: "2025-09-09T09:58:05.448564566Z"
+    dependencies:
+    - name: common
+      repository: oci://registry-1.docker.io/bitnamicharts
+      tags:
+      - bitnami-common
+      version: '*'
+    description: A Helm chart for apple-health-export application
+    digest: e307d3190ed5dc64e690f5ed0ffedac9fe93abe40e3971029628eed449c26687
+    home: https://github.com/WhyThatFunction/apple-health-export
+    keywords:
+    - apple
+    - apple-health
+    - apple-health-export
+    - serverless
+    maintainers:
+    - email: selastlambou@gmail.com
+      name: Stephane Segning
+    - email: team@vaam.com
+      name: VAAM Team
+    name: apple-health-export-serverless
+    sources:
+    - https://github.com/WhyThatFunction/apple-health-export
+    type: application
+    urls:
+    - https://github.com/WhyThatFunction/apple-health-export/releases/download/apple-health-export-serverless-0.1.3/apple-health-export-serverless-0.1.3.tgz
+    version: 0.1.3
+generated: "2025-09-09T09:58:05.44857155Z"
