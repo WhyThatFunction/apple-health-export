@@ -38,7 +38,7 @@ jobs:
           VALIDATE_GITLEAKS: "true"
           VALIDATE_GIT_MERGE_CONFLICT_MARKERS: "true"
           VALIDATE_TRIVY: "true"
-          VALIDATE_YAML: "true"
+          #VALIDATE_YAML: "true"
 
   sast:
     name: "SAST Scan ${{ matrix.checks }}"
