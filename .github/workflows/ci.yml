@@ -201,7 +201,7 @@ jobs:
       # Optional: materialize an SBOM file in SPDX too (in addition to BuildKit’s)
       - name: Generate SBOM (Syft)
         if: github.event_name != 'pull_request'
-        uses: anchore/sbom-action@da167eac915b4e86f08b264dbdbc867b61be6f0c # anchore/sbom-action@v0.20.5
+        uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b # anchore/sbom-action@v0.20.6
         with:
           image: ${{ steps.img.outputs.ref }}
           format: spdx-json
